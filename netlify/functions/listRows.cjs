@@ -1,4 +1,4 @@
-const { getSheetsClient } = require('./utils/google')
+const { getSheetsClient } = require('./utils/google.cjs')
 
 function mapRows(headers, rows) {
   return rows.map(r => {
