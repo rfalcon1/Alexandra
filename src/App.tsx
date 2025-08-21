@@ -18,14 +18,14 @@ export default function App() {
   const [pwd, setPwd] = useState('')
 
   useEffect(()=>{
-    const required = import.meta.env.VITE_APP_PASSWORD || (window as any).APP_PASSWORD
+    const required = import.meta.env.VITE_APP_PASSWORD || (window as any).VITE_APP_PASSWORD
     if (!required) { setOk(true); return }
     const saved = localStorage.getItem('APP_OK') === '1'
     if (saved) setOk(true)
   }, [])
 
   function checkPwd(){
-    const required = import.meta.env.VITE_APP_PASSWORD || (window as any).APP_PASSWORD
+    const required = import.meta.env.VITE_APP_PASSWORD || (window as any).VITE_APP_PASSWORD
     if (!required || pwd === required) { setOk(true); localStorage.setItem('APP_OK', '1') }
   }
 
@@ -51,7 +51,7 @@ export default function App() {
             <div className="max-w-5xl mx-auto p-4">
               <div className="bg-white p-4 rounded-2xl shadow-soft">
                 <h3 className="text-lg font-semibold mb-2">Ajustes</h3>
-                <p className="text-sm text-gray-600">Define variables en Netlify: <code>SHEET_ID</code>, <code>GOOGLE_SERVICE_ACCOUNT</code>, <code>APP_PASSWORD</code> (opcional).</p>
+                <p className="text-sm text-gray-600">Define variables en Netlify: <code>SHEET_ID</code>, <code>GOOGLE_SERVICE_ACCOUNT</code>, <code>VITE_APP_PASSWORD</code> (opcional).</p>
                 <p className="text-sm text-gray-600">Las funciones serverless añaden y leen filas en Google Sheets.</p>
               </div>
             </div>

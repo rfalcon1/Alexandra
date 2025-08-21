@@ -59,7 +59,7 @@ export default function CandidatosForm() {
         <Field label="Teléfono" value={form.Teléfono} onChange={e=>set('Teléfono', e.target.value)} />
         <Field label="Fuente" value={form.Fuente} onChange={e=>set('Fuente', e.target.value)} />
         <Select label="Estado" value={form.EstadoCandidato} onChange={e=>set('EstadoCandidato', e.target.value)}>
-          {EstadosCandidato.map(s=><option key={s}>{s}</option>)}
+          {['Aplicó','Screening','Entrevista 1','Entrevista 2','Oferta','Rechazado','Contratado'].map(s=><option key={s}>{s}</option>)}
         </Select>
         <Field label="Fecha estado" type="date" value={form.FechaEstado} onChange={e=>set('FechaEstado', e.target.value)} />
         <Field label="Próximo paso" value={form.PróximoPaso} onChange={e=>set('PróximoPaso', e.target.value)} />
