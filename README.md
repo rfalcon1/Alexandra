@@ -10,3 +10,7 @@ Incluye Dashboard, Búsqueda, IDs automáticos, horas 12h y duración D/H/M, cat
 1) Conecta repo a Netlify.
 2) `netlify.toml` ya fija Node 20 y empaqueta `googleapis`.
 3) Clear cache & deploy si cambiaste dependencias.
+
+## Credenciales por BASE64
+- Alternativa: define `GOOGLE_SERVICE_ACCOUNT_BASE64` con **base64** del JSON completo.
+- Verifica conexión: `/.netlify/functions/health`
