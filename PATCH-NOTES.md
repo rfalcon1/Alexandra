@@ -1,22 +1,21 @@
-# HRBP v8.3 — Recordatorios programados (email)
+# HRBP v8.4 — Edición de registros (seguimiento)
 
-Archivos NUEVOS:
-- netlify/functions/enqueueReminder.js
-- netlify/functions/checkReminders.js
-- netlify.toml.ADD
+## Qué incluye
+- **Editar desde Búsqueda**: ahora puedes abrir un registro (Tarea, Requisición o Candidato), ver sus campos y **modificarlos**.
+- Los campos que son listas (catálogos) usan sus **Select**; fechas se editan con **date** y horas con **12h AM/PM**.
+- Respeta los encabezados tal como están en la hoja — no cambia el layout.
 
-Archivos ACTUALIZADOS:
-- src/lib/format.ts
-- src/pages/TareasForm.tsx
-- src/pages/RequisicionesForm.tsx
-- src/pages/CandidatosForm.tsx
-- src/pages/Settings.tsx
-- src/pages/Dashboard.tsx
-- src/pages/Search.tsx
-- netlify/functions/listCatalogs.js
-- netlify/functions/addCatalogValue.js
-- netlify/functions/deleteCatalogValue.js
-- netlify/functions/notify.js
+## Archivos NUEVOS
+- `netlify/functions/getRow.js` — obtiene una fila por ID.
+- `netlify/functions/updateRow.js` — actualiza una fila por ID.
 
-Email: usa RESEND_API_KEY o SENDGRID_API_KEY + NOTIFY_FROM.
-Cron: Scheduled Functions (Pro) o cron externo GET /.netlify/functions/checkReminders
+## Archivos ACTUALIZADOS
+- `src/lib/api.ts` — añade `getRow()` y `updateRow()` (mantiene `addRow` y `listRows`).
+- `src/pages/Search.tsx` — añade tabla con botón **Editar** y modal de edición.
+
+## Cómo usar
+1. Ir a **Buscar**, escribe tu criterio.
+2. Pulsa **Editar** en la fila deseada.
+3. Cambia los campos en el modal y **Guardar cambios**.
+
+No se añadieron ni eliminaron columnas; solo se reescribe la fila en su misma posición.
