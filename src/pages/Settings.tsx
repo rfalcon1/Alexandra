@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { addCatalogValue, deleteCatalogValue, fetchCatalogs } from '../lib/catalogs'
 
 const CATEGORIES = ['Negocios','Áreas','TiposTarea','Prioridad','EstadoTarea','EstadoRequisición','EstadoCandidato','TiposContrato','FuentesCandidato']
-const SETTINGS_PWD = 'Baelys@2025' // Nota: protección básica del lado cliente
+const SETTINGS_PWD = 'Baelys@2025' // Protección básica en el UI
 
 export default function SettingsPage() {
   const [catalogs, setCatalogs] = useState<Record<string,string[]>>({})
@@ -11,14 +11,9 @@ export default function SettingsPage() {
   const [ok, setOk] = useState(false)
   const [pwd, setPwd] = useState('')
 
-  useEffect(()=>{
-    fetchCatalogs().then(setCatalogs).catch(()=>{})
-  }, [])
+  useEffect(()=>{ fetchCatalogs().then(setCatalogs).catch(()=>{}) }, [])
 
-  function checkPwd(){
-    if (pwd === SETTINGS_PWD) setOk(true)
-    else alert('Contraseña inválida')
-  }
+  function checkPwd(){ if (pwd === SETTINGS_PWD) setOk(true); else alert('Contraseña inválida') }
 
   async function addVal(){
     if (!val.trim()) return
@@ -27,7 +22,6 @@ export default function SettingsPage() {
     setCatalogs(fresh)
     setVal('')
   }
-
   async function delVal(v: string){
     if (!confirm(`Eliminar "${v}" de ${cat}?`)) return
     await deleteCatalogValue(cat, v)
@@ -42,7 +36,7 @@ export default function SettingsPage() {
         <input type="password" placeholder="Contraseña" value={pwd} onChange={e=>setPwd(e.target.value)}
           className="w-full rounded-xl border px-3 py-2 mb-3" />
         <button onClick={checkPwd} className="px-4 py-2 rounded-2xl bg-blue-600 text-white">Entrar</button>
-        <p className="text-xs text-gray-500 mt-3">Protección básica en el UI. Para seguridad avanzada, usar SSO/RBAC.</p>
+        <p className="text-xs text-gray-500 mt-3">Para seguridad avanzada, usar SSO/RBAC en el backend.</p>
       </div>
     )
   }

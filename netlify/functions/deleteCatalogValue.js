@@ -24,8 +24,5 @@ exports.handler = async (event) => {
       })
     }
     return { statusCode: 200, body: JSON.stringify({ ok:true }) }
-  } catch (err) {
-    console.error(err)
-    return { statusCode: 500, body: String(err.message || err) }
-  }
+  } catch (err) { console.error(err); return { statusCode: 500, body: String(err.message || err) } }
 }

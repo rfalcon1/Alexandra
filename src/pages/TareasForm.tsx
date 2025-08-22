@@ -36,13 +36,9 @@ export default function TareasForm() {
   const [loading, setLoading] = useState(false)
   const [recent, setRecent] = useState<any[]>([])
 
-  useEffect(()=>{
-    listRows('TareasDiarias', 50).then(d=>setRecent(d.rows)).catch(()=>{})
-  }, [])
+  useEffect(()=>{ listRows('TareasDiarias', 50).then(d=>setRecent(d.rows)).catch(()=>{}) }, [])
 
-  function set<K extends keyof Tarea>(k:K, v:any){
-    setForm(prev=>({...prev, [k]: v }))
-  }
+  function set<K extends keyof Tarea>(k:K, v:any){ setForm(prev=>({...prev, [k]: v })) }
 
   const startMin = useMemo(()=>parse12h(form.HoraInicio), [form.HoraInicio])
   const endMin = useMemo(()=>parse12h(form.HoraFin), [form.HoraFin])
@@ -64,11 +60,7 @@ export default function TareasForm() {
       setForm(f=>({...f, Descripción:'', Notas:'', HoraFin:'', 'Referencia/ID': genId(), 'Resultado/Acción':''}))
       const d = await listRows('TareasDiarias', 50)
       setRecent(d.rows)
-    } catch (err:any) {
-      alert('Error: ' + err.message)
-    } finally {
-      setLoading(false)
-    }
+    } catch (err:any) { alert('Error: ' + err.message) } finally { setLoading(false) }
   }
 
   return (
@@ -92,7 +84,7 @@ export default function TareasForm() {
         <Field label="Subtipo/Detalle" value={form.Subtipo} onChange={e=>set('Subtipo', e.target.value)} />
         <TextArea label="Descripción" rows={3} value={form.Descripción} onChange={e=>set('Descripción', e.target.value)} />
         <Select label="Prioridad" value={form.Prioridad} onChange={e=>set('Prioridad', e.target.value)}>
-          {['Baja','Media','Alta','Crítica'].map(p=><option key={p}>{p}</option>)}
+          {Prioridades.map(p=><option key={p}>{p}</option>)}
         </Select>
         <Field label="SLA (fecha)" type="date" value={form.SLA_Fecha} onChange={e=>set('SLA_Fecha', e.target.value)} />
         <Select label="Estado" value={form.Estado} onChange={e=>set('Estado', e.target.value)}>

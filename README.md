@@ -1,19 +1,12 @@
 # HRBP — Tareas & Contrataciones (Netlify + Google Sheets)
-
-Incluye: Dashboard, Búsqueda, IDs automáticos, horas 12h, duración D/H/M, catálogos editables con contraseña en Ajustes.
-
-## Preparación
-1. Google Sheets con pestañas y encabezados:
-   - TareasDiarias, Requisiciones, Candidatos (encabezados en README anterior)
-2. Catalogos (opcional): fila 1 -> Categoria | Valor
-3. Service Account con acceso Editor a la hoja.
+Incluye Dashboard, Búsqueda, IDs automáticos, horas 12h y duración D/H/M, catálogos editables (Ajustes con password).
 
 ## Variables Netlify
 - SHEET_ID
-- GOOGLE_SERVICE_ACCOUNT (JSON en 1 línea)
-- APP_PASSWORD (opcional para el UI)
+- GOOGLE_SERVICE_ACCOUNT (JSON minificado en 1 línea)
+- APP_PASSWORD (opcional — protección visual del sitio)
 
-## Scripts
-- npm install
-- npm run dev
-- npm run build
+## Despliegue
+1) Conecta repo a Netlify.
+2) `netlify.toml` ya fija Node 20 y empaqueta `googleapis`.
+3) Clear cache & deploy si cambiaste dependencias.
