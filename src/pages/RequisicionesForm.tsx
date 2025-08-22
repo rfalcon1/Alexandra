@@ -60,7 +60,7 @@ export default function RequisicionesForm() {
         <Select label="Tipo de contrato" value={form.TipoContrato} onChange={e=>set('TipoContrato', e.target.value)}>
           {TiposContrato.map(t=><option key={t}>{t}</option>)}
         </Select>
-        <Field label="Fecha de publicación" type="date" value={form.FechaPublicación} onChange={e=>set('FechaPublicición', e.target.value)} />
+        <Field label="Fecha de publicación" type="date" value={form.FechaPublicación} onChange={e=>set('FechaPublicación', e.target.value)} />
         <Field label="SLA cierre" type="date" value={form.SLA_Cierre} onChange={e=>set('SLA_Cierre', e.target.value)} />
         <Select label="Estado" value={form.EstadoRequisición} onChange={e=>set('EstadoRequisición', e.target.value)}>
           {EstadosRequisición.map(s=><option key={s}>{s}</option>)}
