@@ -4,8 +4,13 @@ import Tabs from './components/Tabs'
 import TareasForm from './pages/TareasForm'
 import RequisicionesForm from './pages/RequisicionesForm'
 import CandidatosForm from './pages/CandidatosForm'
+import Dashboard from './pages/Dashboard'
+import SearchPage from './pages/Search'
+import SettingsPage from './pages/Settings'
 
 const tabs = [
+  { id: 'dashboard', label: 'Dashboard' },
+  { id: 'buscar', label: 'Buscar' },
   { id: 'tareas', label: 'Tareas diarias' },
   { id: 'requisiciones', label: 'Requisiciones' },
   { id: 'candidatos', label: 'Candidatos' },
@@ -13,24 +18,24 @@ const tabs = [
 ]
 
 export default function App() {
-  const [active, setActive] = useState('tareas')
+  const [active, setActive] = useState('dashboard')
   const [ok, setOk] = useState(false)
   const [pwd, setPwd] = useState('')
 
   useEffect(()=>{
-    const required = import.meta.env.VITE_APP_PASSWORD || (window as any).VITE_APP_PASSWORD
+    const required = import.meta.env.VITE_APP_PASSWORD || (window as any).APP_PASSWORD
     if (!required) { setOk(true); return }
     const saved = localStorage.getItem('APP_OK') === '1'
     if (saved) setOk(true)
   }, [])
 
   function checkPwd(){
-    const required = import.meta.env.VITE_APP_PASSWORD || (window as any).VITE_APP_PASSWORD
+    const required = import.meta.env.VITE_APP_PASSWORD || (window as any).APP_PASSWORD
     if (!required || pwd === required) { setOk(true); localStorage.setItem('APP_OK', '1') }
   }
 
   return (
-    <div>
+    <div className="app-bg min-h-screen">
       <Header />
       <Tabs tabs={tabs} active={active} onChange={setActive} />
 
@@ -44,18 +49,12 @@ export default function App() {
         </div>
       ) : (
         <div>
+          {active === 'dashboard' && <Dashboard />}
+          {active === 'buscar' && <SearchPage />}
           {active === 'tareas' && <TareasForm />}
           {active === 'requisiciones' && <RequisicionesForm />}
           {active === 'candidatos' && <CandidatosForm />}
-          {active === 'ajustes' && (
-            <div className="max-w-5xl mx-auto p-4">
-              <div className="bg-white p-4 rounded-2xl shadow-soft">
-                <h3 className="text-lg font-semibold mb-2">Ajustes</h3>
-                <p className="text-sm text-gray-600">Define variables en Netlify: <code>SHEET_ID</code>, <code>GOOGLE_SERVICE_ACCOUNT</code>, <code>VITE_APP_PASSWORD</code> (opcional).</p>
-                <p className="text-sm text-gray-600">Las funciones serverless añaden y leen filas en Google Sheets.</p>
-              </div>
-            </div>
-          )}
+          {active === 'ajustes' && <SettingsPage />}
         </div>
       )}
     </div>

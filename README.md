@@ -1,31 +1,19 @@
 # HRBP — Tareas & Contrataciones (Netlify + Google Sheets)
 
-App React (Vite + TS + Tailwind) con **Netlify Functions** como backend y **Google Sheets** como BD ligera.
+Incluye: Dashboard, Búsqueda, IDs automáticos, horas 12h, duración D/H/M, catálogos editables con contraseña en Ajustes.
 
-## 1) Google Sheets
-Crea pestañas: `TareasDiarias`, `Requisiciones`, `Candidatos` y coloca los encabezados en la fila 1 (idénticos a tu plantilla). Copia el **Spreadsheet ID**.
+## Preparación
+1. Google Sheets con pestañas y encabezados:
+   - TareasDiarias, Requisiciones, Candidatos (encabezados en README anterior)
+2. Catalogos (opcional): fila 1 -> Categoria | Valor
+3. Service Account con acceso Editor a la hoja.
 
-## 2) Service Account
-- En Google Cloud: habilita **Google Sheets API**, crea una **Service Account** y su **clave JSON**.
-- Comparte tu Google Sheet con el **email** de la Service Account (rol **Editor**).
+## Variables Netlify
+- SHEET_ID
+- GOOGLE_SERVICE_ACCOUNT (JSON en 1 línea)
+- APP_PASSWORD (opcional para el UI)
 
-## 3) Netlify (Site from Git)
-- Variables de entorno:
-  - `SHEET_ID` → ID de la hoja
-  - `GOOGLE_SERVICE_ACCOUNT` → JSON completo de la Service Account (con `\n` en `private_key`)
-  - `VITE_APP_PASSWORD` (opcional) → contraseña simple de acceso a la UI
-- `netlify.toml` fija **Node 20** y empaqueta `googleapis` para Functions.
-
-## 4) Local
-```bash
-npm install
-cp .env.example .env  # edita valores
-npm run dev
-```
-
-## 5) Estructura
-- Frontend: `src/` (páginas de Tareas, Requisiciones, Candidatos).
-- Backend: `netlify/functions/*.cjs` (CommonJS).
-
-## 6) Deploy limpio
-En Netlify → Deploys → **Clear cache and deploy** si cambiaste dependencias.
+## Scripts
+- npm install
+- npm run dev
+- npm run build

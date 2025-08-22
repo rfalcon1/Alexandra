@@ -61,4 +61,16 @@ export const TiposTarea = [
 export const Prioridades = ["Baja","Media","Alta","Crítica"]
 export const EstadosTarea = ["Abierta","En proceso","En espera","Cerrada"]
 export const EstadosRequisición = ["Abierta","Screening","Entrevistas","Oferta","Contratada","Cancelada"]
-export const EstadosCandidato = ["Aplicó","Screening","Entrevista 1","Entrevista 2","Oferta","Rechazado","Contratado"]
+
+export const TiposContrato = [
+  "Tiempo completo","Tiempo parcial","Temporal","Por horas","Por proyecto",
+  "Contrato fijo","Consultoría","Servicios profesionales","Outsourcing","Seasonal","Internado"
+]
+export const FuentesCandidato = [
+  "LinkedIn","Indeed","Glassdoor","Computrabajo","Facebook","Instagram","X/Twitter",
+  "Página corporativa","Referido interno","Agencia de empleo","Universidad",
+  "Feria de empleo","Gobierno PR - Empleos","Handshake","Monster","ZipRecruiter","Boletín interno"
+]
+export const EstadosCandidato = [
+  "Aplicó","Screening","Entrevista 1","Entrevista 2","Oferta","Rechazado","Contratado"
+]

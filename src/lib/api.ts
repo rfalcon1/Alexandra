@@ -7,7 +7,6 @@ export async function addRow(sheet: string, values: any[]) {
   if (!res.ok) throw new Error(await res.text())
   return res.json()
 }
-
 export async function listRows(sheet: string, limit = 25) {
   const params = new URLSearchParams({ sheet, limit: String(limit) })
   const res = await fetch('/.netlify/functions/listRows?' + params.toString())

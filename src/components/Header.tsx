@@ -7,7 +7,7 @@ export default function Header() {
         <div className="p-2 rounded-2xl bg-blue-50"><Briefcase /></div>
         <div>
           <h1 className="text-xl font-semibold tracking-tight">HRBP — Tareas & Contrataciones</h1>
-          <p className="text-sm text-gray-500">Registro diario y seguimiento de requisiciones y candidatos</p>
+          <p className="text-sm text-gray-500">Registro diario y seguimiento · Zona horaria: Puerto Rico</p>
         </div>
       </div>
     </header>
