@@ -8,7 +8,6 @@ export default function Dashboard() {
   const [tareas, setTareas] = useState<any[]>([])
   const [reqs, setReqs] = useState<any[]>([])
   const [cands, setCands] = useState<any[]>([])
-
   const [ok, setOk] = useState(Prefs.reportsUnlocked)
   const [pwd, setPwd] = useState('')
 
@@ -19,16 +18,11 @@ export default function Dashboard() {
       listRows('Requisiciones', 2000),
       listRows('Candidatos', 2000),
     ]).then(([t, r, c])=>{
-      setTareas(t.rows)
-      setReqs(r.rows)
-      setCands(c.rows)
+      setTareas(t.rows); setReqs(r.rows); setCands(c.rows)
     })
   }, [ok])
 
-  function unlock(){
-    if (pwd === SETTINGS_PWD) { setOk(true); Prefs.reportsUnlocked = true }
-    else alert('Contraseña inválida')
-  }
+  function unlock(){ if (pwd === SETTINGS_PWD) { setOk(true); Prefs.reportsUnlocked = true } else alert('Contraseña inválida') }
 
   if (!ok) {
     return (
@@ -76,8 +70,7 @@ export default function Dashboard() {
   const tareasPorFecha = useMemo(()=>{
     const map: Record<string, number> = {}
     tareas.forEach(t=>{ const k=t.Fecha || 'N/A'; map[k]=(map[k]||0)+1 })
-    return Object.entries(map).map(([d, count])=>({ date: fmtDatePR(d), count }))
-      .sort((a,b)=> a.date.localeCompare(b.date))
+    return Object.entries(map).map(([d, count])=>({ date: fmtDatePR(d), count })).sort((a,b)=> a.date.localeCompare(b.date))
   }, [tareas])
 
   return (
@@ -106,8 +99,7 @@ export default function Dashboard() {
                 <CartesianGrid stroke={THEME.grid} strokeDasharray="3 3" />
                 <XAxis dataKey="name" stroke={THEME.axis} />
                 <YAxis stroke={THEME.axis} />
-                <Tooltip />
-                <Legend />
+                <Tooltip /><Legend />
                 <Bar dataKey="value" name="Cantidad" fill={THEME.c1} />
               </BarChart>
             </ResponsiveContainer>
@@ -120,8 +112,7 @@ export default function Dashboard() {
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie data={reqPorEstado} dataKey="value" nameKey="name" label fill={THEME.c3} />
-                <Tooltip />
-                <Legend />
+                <Tooltip /><Legend />
               </PieChart>
             </ResponsiveContainer>
           </div>
@@ -135,8 +126,7 @@ export default function Dashboard() {
                 <CartesianGrid stroke={THEME.grid} strokeDasharray="3 3" />
                 <XAxis dataKey="name" stroke={THEME.axis} />
                 <YAxis stroke={THEME.axis} />
-                <Tooltip />
-                <Legend />
+                <Tooltip /><Legend />
                 <Bar dataKey="value" name="Cantidad" fill={THEME.c5} />
               </BarChart>
             </ResponsiveContainer>
@@ -151,8 +141,7 @@ export default function Dashboard() {
                 <CartesianGrid stroke={THEME.grid} strokeDasharray="3 3" />
                 <XAxis dataKey="name" stroke={THEME.axis} />
                 <YAxis stroke={THEME.axis} />
-                <Tooltip />
-                <Legend />
+                <Tooltip /><Legend />
                 <Bar dataKey="value" name="Cantidad" fill={THEME.c6} />
               </BarChart>
             </ResponsiveContainer>
@@ -167,8 +156,7 @@ export default function Dashboard() {
                 <CartesianGrid stroke={THEME.grid} strokeDasharray="3 3" />
                 <XAxis dataKey="date" stroke={THEME.axis} />
                 <YAxis stroke={THEME.axis} />
-                <Tooltip />
-                <Legend />
+                <Tooltip /><Legend />
                 <Line type="monotone" dataKey="count" name="Tareas" stroke={THEME.c1} strokeWidth={3} dot={false} />
               </LineChart>
             </ResponsiveContainer>

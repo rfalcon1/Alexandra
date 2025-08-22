@@ -7,11 +7,10 @@ export const THEME = {
   c4: '#db2777', // pink
   c5: '#0ea5e9', // sky
   c6: '#a855f7', // purple
-  axis: '#475569', // slate-600
-  grid: '#cbd5e1'  // slate-300
+  axis: '#475569',
+  grid: '#cbd5e1'
 }
 
-// Preferencias guardadas en el navegador
 export const Prefs = {
   get maskSensitive(): boolean { return localStorage.getItem('MASK_SENSITIVE') !== '0' },
   set maskSensitive(v: boolean) { localStorage.setItem('MASK_SENSITIVE', v ? '1' : '0') },
@@ -20,5 +19,5 @@ export const Prefs = {
   set notifyEmail(v: string) { localStorage.setItem('NOTIFY_EMAIL', v) },
 
   get reportsUnlocked(): boolean { return localStorage.getItem('REPORTS_OK') === '1' },
-  set reportsUnlocked(v: boolean) { localStorage.setItem('REPORTS_OK', v ? '1':'0') },
+  set reportsUnlocked(v: boolean) { localStorage.setItem('REPORTS_OK', v ? '1' : '0') },
 }

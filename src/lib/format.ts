@@ -1,4 +1,3 @@
-// Zona PR (solo para legibilidad; los <input type="date"> usan ISO)
 const TZ = 'America/Puerto_Rico'
 
 export function todayISO(): string {
@@ -9,7 +8,21 @@ export function todayISO(): string {
   return `${y}-${m}-${day}`
 }
 
-// "08:15 PM" -> minutos desde medianoche
+export function addDaysISO(baseISO: string, days: number): string {
+  const [y,m,d] = baseISO.split('-').map(Number)
+  const dt = new Date(Date.UTC(y, m-1, d))
+  dt.setUTCDate(dt.getUTCDate() + days)
+  const yy = dt.getUTCFullYear()
+  const mm = String(dt.getUTCMonth()+1).padStart(2,'0')
+  const dd = String(dt.getUTCDate()).padStart(2,'0')
+  return `${yy}-${mm}-${dd}`
+}
+
+export function isoTodayPR(): string {
+  const f = new Intl.DateTimeFormat('en-CA',{ timeZone: 'America/Puerto_Rico', year:'numeric', month:'2-digit', day:'2-digit' })
+  return f.format(new Date())
+}
+
 export function parse12h(s: string): number {
   if (!s) return NaN
   const m = s.match(/^\s*(\d{1,2}):(\d{2})\s*([AP]M)\s*$/i)
@@ -36,7 +49,6 @@ export function diffDHMS(startMin?: number, endMin?: number) {
   return { min: (endMin! - startMin!), text: parts.join(' ') }
 }
 
-// "YYYY-MM-DD" -> "MM/DD/YYYY" (estándar PR/US)
 export function fmtDatePR(d: string): string {
   const m = d?.match(/^(\d{4})-(\d{2})-(\d{2})$/)
   if (!m) return d || ''

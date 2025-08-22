@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Field, Select, TextArea } from '../components/Field'
 import { addRow } from '../lib/api'
-import { todayISO } from '../lib/format'
+import { todayISO, addDaysISO } from '../lib/format'
 import { fetchCatalogs } from '../lib/catalogs'
 import { Prefs } from '../config'
 
@@ -15,25 +15,23 @@ function genId() {
 export default function CandidatosForm() {
   const [catalogs, setCatalogs] = useState<Record<string,string[]>>({})
   const [form, setForm] = useState<any>({
-    CandidatoID: genId(),
-    RequisiciónID: '',
-    Nombre: '',
-    Email: '',
-    Teléfono: '',
-    Fuente: 'LinkedIn',
-    EstadoCandidato: 'Aplicó',
-    FechaEstado: todayISO(),
-    PróximoPaso: '',
-    RecordatorioFecha: '',
-    'Calificación(1-5)': '',
-    Clasificación: '',
-    Notas: ''
+    CandidatoID: genId(), RequisiciónID: '',
+    Nombre: '', Email: '', Teléfono: '',
+    Fuente: 'LinkedIn', EstadoCandidato: 'Aplicó', FechaEstado: todayISO(),
+    PróximoPaso: '', RecordatorioFecha: '', RecordatorioEn: '',
+    'Calificación(1-5)': '', Clasificación: '', Notas: ''
   })
   const [loading, setLoading] = useState(false)
 
   useEffect(()=>{ fetchCatalogs().then(setCatalogs).catch(()=>{}) }, [])
-
   function set<K extends keyof any>(k:K, v:any){ setForm((prev:any)=>({...prev, [k]: v })) }
+
+  function calcDueDate(): string | null {
+    if (form.RecordatorioFecha) return form.RecordatorioFecha
+    const map:any = { '2d':2, '3d':3, '7d':7, '14d':14, '30d':30 }
+    if (map[form.RecordatorioEn]) return addDaysISO(todayISO(), map[form.RecordatorioEn])
+    return null
+  }
 
   async function submit(e:any){
     e.preventDefault()
@@ -45,22 +43,25 @@ export default function CandidatosForm() {
         form.PróximoPaso || '', form.RecordatorioFecha || '', form['Calificación(1-5)'] || '', form.Clasificación || '', form.Notas || ''
       ]
       await addRow('Candidatos', values)
-      alert('Guardado ✅')
-      setForm((f:any)=>({...f, CandidatoID: genId(), Notas:''}))
-    } catch (err:any) { alert('Error: ' + err.message) } finally { setLoading(false) }
-  }
 
-  async function quickNotify(){
-    if (!Prefs.notifyEmail) { alert('Configura tu email en Ajustes.'); return }
-    const body = {
-      to: Prefs.notifyEmail,
-      subject: 'Recordatorio de próximo paso — HRBP',
-      text: `Candidato ${form.Nombre||form.CandidatoID} — Próximo paso: ${form.PróximoPaso||'N/A'} — Fecha: ${form.RecordatorioFecha||'N/A'}`
-    }
-    const res = await fetch('/.netlify/functions/notify', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) })
-    const ok = res.ok
-    const msg = await res.text()
-    alert(ok ? 'Recordatorio enviado ✅' : 'No se pudo enviar: ' + msg)
+      const due = calcDueDate()
+      if (Prefs.notifyEmail && due) {
+        await fetch('/.netlify/functions/enqueueReminder', {
+          method:'POST', headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({
+            type: 'Candidato',
+            refId: form.CandidatoID,
+            email: Prefs.notifyEmail,
+            subject: `Recordatorio — Candidato ${form.CandidatoID}`,
+            text: `Nombre: ${form.Nombre || '(sin nombre)'}\nPróximo paso: ${form.PróximoPaso || 'N/A'}`,
+            dueDate: due
+          })
+        })
+      }
+
+      alert('Guardado ✅')
+      setForm((f:any)=>({...f, CandidatoID: genId(), Notas:'', RecordatorioEn:'', RecordatorioFecha:''}))
+    } catch (err:any) { alert('Error: ' + err.message) } finally { setLoading(false) }
   }
 
   return (
@@ -82,7 +83,15 @@ export default function CandidatosForm() {
           <option value=""></option>
           {(catalogs['Próximo paso']||[]).map((s:string)=><option key={s}>{s}</option>)}
         </Select>
-        <Field label="Recordatorio (fecha)" type="date" value={form.RecordatorioFecha} onChange={e=>set('RecordatorioFecha', e.target.value)} />
+        <Field label="Recordatorio (fecha exacta)" type="date" value={form.RecordatorioFecha} onChange={e=>set('RecordatorioFecha', e.target.value)} />
+        <Select label="o Recordatorio en" value={form.RecordatorioEn} onChange={e=>set('RecordatorioEn', e.target.value)}>
+          <option value=""></option>
+          <option value="2d">2 días</option>
+          <option value="3d">3 días</option>
+          <option value="7d">1 semana</option>
+          <option value="14d">2 semanas</option>
+          <option value="30d">1 mes</option>
+        </Select>
         <Field label="Calificación (1-5)" type="number" min={1} max={5} value={String(form['Calificación(1-5)']||'')} onChange={e=>set('Calificación(1-5)', Number(e.target.value))} />
         <Select label="Clasificación" value={form.Clasificación} onChange={e=>set('Clasificación', e.target.value)}>
           <option value=""></option>
@@ -91,7 +100,6 @@ export default function CandidatosForm() {
         <TextArea label="Notas" rows={2} value={form.Notas} onChange={e=>set('Notas', e.target.value)} />
         <div className="md:col-span-2 flex gap-3">
           <button disabled={loading} className="px-4 py-2 rounded-2xl bg-blue-600 text-white hover:bg-blue-700 transition disabled:opacity-50">{loading ? 'Guardando…' : 'Guardar candidato'}</button>
-          <button type="button" onClick={quickNotify} className="px-4 py-2 rounded-2xl bg-amber-500 text-white">Enviar recordatorio</button>
         </div>
       </form>
     </div>

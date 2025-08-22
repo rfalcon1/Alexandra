@@ -1,0 +1,3 @@
+# Scheduled Functions (requiere plan con soporte)
+# [functions."checkReminders"]
+#   schedule = "0 12 * * *"  # 12:00 UTC = 08:00 America/Puerto_Rico

@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Field, Select, TextArea } from '../components/Field'
 import { addRow } from '../lib/api'
-import { parse12h, diffDHMS, todayISO } from '../lib/format'
+import { parse12h, diffDHMS, todayISO, addDaysISO } from '../lib/format'
 import { fetchCatalogs } from '../lib/catalogs'
 import { Prefs } from '../config'
 
@@ -11,7 +11,6 @@ function genId() {
   const rnd = Math.random().toString(36).slice(2,6).toUpperCase()
   return `TASK-${ts}-${rnd}`
 }
-
 function timeOptions(){
   const out:string[] = []
   const labels=(n:number)=>{
@@ -30,34 +29,34 @@ export default function TareasForm() {
   const [catalogs, setCatalogs] = useState<Record<string,string[]>>({})
   const [form, setForm] = useState<any>({
     Fecha: todayISO(),
-    HoraInicio: '08:00 AM',
-    HoraFin: '',
-    Negocio: 'Banca Retail',
-    Área: 'Reclutamiento',
-    TipoTarea: 'Reunión',
-    Subtipo: '',
-    Descripción: '',
+    HoraInicio: '08:00 AM', HoraFin: '',
+    Negocio: 'Banca Retail', Área: 'Reclutamiento',
+    TipoTarea: 'Reunión', Subtipo: '', Descripción: '',
     Prioridad: 'Media',
     SLA_Fecha: '',
     Estado: 'En proceso',
     'ClienteInterno/Unidad': '',
-    Responsable: '',
-    Aprobador: '',
+    Responsable: '', Aprobador: '',
     'Referencia/ID': genId(),
     'Resultado/Acción': '',
-    'SLA_NotaExtension': '',
-    Notas: '',
-    'Adjuntos(URL)': ''
+    'SLA_NotaExtension': '', Notas: '', 'Adjuntos(URL)': '',
+    RecordatorioEn: '', RecordatorioFecha: ''
   })
   const [loading, setLoading] = useState(false)
 
   useEffect(()=>{ fetchCatalogs().then(setCatalogs).catch(()=>{}) }, [])
-
   function set<K extends keyof any>(k:K, v:any){ setForm((prev:any)=>({...prev, [k]: v })) }
 
   const startMin = useMemo(()=>parse12h(form.HoraInicio), [form.HoraInicio])
   const endMin = useMemo(()=>parse12h(form.HoraFin), [form.HoraFin])
   const diff = useMemo(()=>diffDHMS(startMin, endMin), [startMin, endMin])
+
+  function calcDueDate(): string | null {
+    if (form.RecordatorioFecha) return form.RecordatorioFecha
+    const map:any = { '2d':2, '3d':3, '7d':7, '14d':14, '30d':30 }
+    if (map[form.RecordatorioEn]) return addDaysISO(todayISO(), map[form.RecordatorioEn])
+    return null
+  }
 
   async function submit(e:any){
     e.preventDefault()
@@ -71,22 +70,29 @@ export default function TareasForm() {
         form['Resultado/Acción'] || '', form['SLA_NotaExtension'] || '', form.Notas || '', form['Adjuntos(URL)'] || ''
       ]
       await addRow('TareasDiarias', values)
-      alert('Guardado ✅')
-      setForm((f:any)=>({...f, Descripción:'', Notas:'', HoraFin:'', 'Referencia/ID': genId(), 'Resultado/Acción':'', 'SLA_NotaExtension':''}))
-    } catch (err:any) { alert('Error: ' + err.message) } finally { setLoading(false) }
-  }
 
-  async function quickNotify(){
-    if (!Prefs.notifyEmail) { alert('Configura tu email en Ajustes.'); return }
-    const body = {
-      to: Prefs.notifyEmail,
-      subject: 'Recordatorio de SLA/Seguimiento — HRBP',
-      text: `Tarea ${form['Referencia/ID']} — ${form.Descripción || '(sin descripción)'}\nSLA: ${form.SLA_Fecha || 'N/A'}`
-    }
-    const res = await fetch('/.netlify/functions/notify', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) })
-    const ok = res.ok
-    const msg = await res.text()
-    alert(ok ? 'Recordatorio enviado ✅' : 'No se pudo enviar: ' + msg)
+      const due = calcDueDate()
+      if (Prefs.notifyEmail && due) {
+        await fetch('/.netlify/functions/enqueueReminder', {
+          method:'POST', headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({
+            type: 'Tarea',
+            refId: form['Referencia/ID'],
+            email: Prefs.notifyEmail,
+            subject: `Recordatorio — Tarea ${form['Referencia/ID']}`,
+            text: `Tarea: ${form.Descripción || '(sin descripción)'}\nSLA: ${form.SLA_Fecha || 'N/A'}`,
+            dueDate: due
+          })
+        })
+      }
+
+      alert('Guardado ✅')
+      setForm((f:any)=>({
+        ...f, Descripción:'', Notas:'', HoraFin:'',
+        'Referencia/ID': genId(), 'Resultado/Acción':'', 'SLA_NotaExtension':'',
+        RecordatorioEn:'', RecordatorioFecha:''
+      }))
+    } catch (err:any) { alert('Error: ' + err.message) } finally { setLoading(false) }
   }
 
   return (
@@ -148,9 +154,22 @@ export default function TareasForm() {
 
         <TextArea label="Notas" rows={2} value={form.Notas} onChange={e=>set('Notas', e.target.value)} />
         <Field label="Adjuntos (URL)" value={form['Adjuntos(URL)']} onChange={e=>set('Adjuntos(URL)', e.target.value)} />
+
+        <div className="md:col-span-2 grid md:grid-cols-3 gap-3 p-3 rounded-xl bg-slate-50 border">
+          <Select label="Recordatorio en" value={form.RecordatorioEn} onChange={e=>set('RecordatorioEn', e.target.value)}>
+            <option value=""></option>
+            <option value="2d">2 días</option>
+            <option value="3d">3 días</option>
+            <option value="7d">1 semana</option>
+            <option value="14d">2 semanas</option>
+            <option value="30d">1 mes</option>
+          </Select>
+          <Field label="o fecha exacta (opcional)" type="date" value={form.RecordatorioFecha} onChange={e=>set('RecordatorioFecha', e.target.value)} />
+          <div className="flex items-end"><span className="text-xs text-gray-500">* Se enviará al email configurado en Ajustes.</span></div>
+        </div>
+
         <div className="md:col-span-2 flex gap-3">
           <button disabled={loading} className="px-4 py-2 rounded-2xl bg-blue-600 text-white hover:bg-blue-700 transition disabled:opacity-50">{loading ? 'Guardando…' : 'Guardar tarea'}</button>
-          <button type="button" onClick={quickNotify} className="px-4 py-2 rounded-2xl bg-amber-500 text-white">Enviar recordatorio</button>
         </div>
       </form>
     </div>

@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react'
 import { Field, Select, TextArea } from '../components/Field'
 import { addRow } from '../lib/api'
-import { todayISO } from '../lib/format'
+import { todayISO, addDaysISO } from '../lib/format'
 import { fetchCatalogs } from '../lib/catalogs'
+import { Prefs } from '../config'
 
 function genId() {
   const t = new Date()
@@ -14,24 +15,22 @@ function genId() {
 export default function RequisicionesForm() {
   const [catalogs, setCatalogs] = useState<Record<string,string[]>>({})
   const [form, setForm] = useState<any>({
-    RequisiciónID: genId(),
-    Negocio: '',
-    Puesto: '',
-    Ubicación: '',
-    Área: '',
-    TipoContrato: 'Tiempo completo',
-    FechaPublicación: todayISO(),
-    SLA_Cierre: '',
-    EstadoRequisición: 'Abierta',
-    Responsable: '',
-    Aprobador: '',
-    Notas: ''
+    RequisiciónID: genId(), Negocio: '', Puesto: '', Ubicación: '',
+    Área: '', TipoContrato: 'Tiempo completo', FechaPublicación: todayISO(),
+    SLA_Cierre: '', EstadoRequisición: 'Abierta', Responsable: '', Aprobador: '', Notas: '',
+    RecordatorioEn: '', RecordatorioFecha: ''
   })
   const [loading, setLoading] = useState(false)
 
   useEffect(()=>{ fetchCatalogs().then(setCatalogs).catch(()=>{}) }, [])
-
   function set<K extends keyof any>(k:K, v:any){ setForm((prev:any)=>({...prev, [k]: v })) }
+
+  function calcDueDate(): string | null {
+    if (form.RecordatorioFecha) return form.RecordatorioFecha
+    const map:any = { '2d':2, '3d':3, '7d':7, '14d':14, '30d':30 }
+    if (map[form.RecordatorioEn]) return addDaysISO(todayISO(), map[form.RecordatorioEn])
+    return null
+  }
 
   async function submit(e:any){
     e.preventDefault()
@@ -43,8 +42,24 @@ export default function RequisicionesForm() {
         form.EstadoRequisición, form.Responsable || '', form.Aprobador || '', form.Notas || ''
       ]
       await addRow('Requisiciones', values)
+
+      const due = calcDueDate()
+      if (Prefs.notifyEmail && due) {
+        await fetch('/.netlify/functions/enqueueReminder', {
+          method:'POST', headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({
+            type: 'Requisición',
+            refId: form.RequisiciónID,
+            email: Prefs.notifyEmail,
+            subject: `Recordatorio — Requisición ${form.RequisiciónID}`,
+            text: `Puesto: ${form.Puesto || '(sin puesto)'}\nEstado: ${form.EstadoRequisición}`,
+            dueDate: due
+          })
+        })
+      }
+
       alert('Guardado ✅')
-      setForm((f:any)=>({...f, RequisiciónID: genId(), Notas:''}))
+      setForm((f:any)=>({...f, RequisiciónID: genId(), Notas:'', RecordatorioEn:'', RecordatorioFecha:''}))
     } catch (err:any) { alert('Error: ' + err.message) } finally { setLoading(false) }
   }
 
@@ -83,6 +98,20 @@ export default function RequisicionesForm() {
           {(catalogs['Aprobador (Requisiciones)']||[]).map((n:string)=><option key={n}>{n}</option>)}
         </Select>
         <TextArea label="Notas" rows={2} value={form.Notas} onChange={e=>set('Notas', e.target.value)} />
+
+        <div className="md:col-span-2 grid md:grid-cols-3 gap-3 p-3 rounded-xl bg-slate-50 border">
+          <Select label="Recordatorio en" value={form.RecordatorioEn} onChange={e=>set('RecordatorioEn', e.target.value)}>
+            <option value=""></option>
+            <option value="2d">2 días</option>
+            <option value="3d">3 días</option>
+            <option value="7d">1 semana</option>
+            <option value="14d">2 semanas</option>
+            <option value="30d">1 mes</option>
+          </Select>
+          <Field label="o fecha exacta (opcional)" type="date" value={form.RecordatorioFecha} onChange={e=>set('RecordatorioFecha', e.target.value)} />
+          <div className="flex items-end"><span className="text-xs text-gray-500">* Se enviará al email configurado en Ajustes.</span></div>
+        </div>
+
         <div className="md:col-span-2 flex gap-3">
           <button disabled={loading} className="px-4 py-2 rounded-2xl bg-blue-600 text-white hover:bg-blue-700 transition disabled:opacity-50">{loading ? 'Guardando…' : 'Guardar requisición'}</button>
         </div>
