@@ -1,15 +1,18 @@
 import { useEffect, useState } from 'react'
 import { addCatalogValue, deleteCatalogValue, fetchCatalogs } from '../lib/catalogs'
+import { Prefs, SETTINGS_PWD } from '../config'
 
-const CATEGORIES = ['Negocios','Áreas','TiposTarea','Prioridad','EstadoTarea','EstadoRequisición','EstadoCandidato','TiposContrato','FuentesCandidato']
-const SETTINGS_PWD = 'Baelys@2025' // Protección básica en el UI
+const CATEGORIES = ['Negocios','Áreas','TiposTarea','Prioridad','EstadoTarea','EstadoRequisición','EstadoCandidato','TiposContrato','FuentesCandidato',
+'Subtipo/Detalle','ClienteInterno/Unidad','Responsable','Aprobador','Resultado/Acción','Puesto','Ubicación','Responsable (Requisiciones)','Aprobador (Requisiciones)','Próximo paso','Clasificación']
 
 export default function SettingsPage() {
   const [catalogs, setCatalogs] = useState<Record<string,string[]>>({})
-  const [cat, setCat] = useState('Negocios')
+  const [cat, setCat] = useState(CATEGORIES[0])
   const [val, setVal] = useState('')
   const [ok, setOk] = useState(false)
   const [pwd, setPwd] = useState('')
+  const [mask, setMask] = useState(Prefs.maskSensitive)
+  const [email, setEmail] = useState(Prefs.notifyEmail)
 
   useEffect(()=>{ fetchCatalogs().then(setCatalogs).catch(()=>{}) }, [])
 
@@ -29,6 +32,12 @@ export default function SettingsPage() {
     setCatalogs(fresh)
   }
 
+  function savePrefs(){
+    Prefs.maskSensitive = mask
+    Prefs.notifyEmail = email.trim()
+    alert('Preferencias guardadas ✅')
+  }
+
   if (!ok) {
     return (
       <div className="max-w-md mx-auto p-6 mt-6 bg-white rounded-2xl shadow-soft">
@@ -36,13 +45,32 @@ export default function SettingsPage() {
         <input type="password" placeholder="Contraseña" value={pwd} onChange={e=>setPwd(e.target.value)}
           className="w-full rounded-xl border px-3 py-2 mb-3" />
         <button onClick={checkPwd} className="px-4 py-2 rounded-2xl bg-blue-600 text-white">Entrar</button>
-        <p className="text-xs text-gray-500 mt-3">Para seguridad avanzada, usar SSO/RBAC en el backend.</p>
+        <p className="text-xs text-gray-500 mt-3">El área de Ajustes está protegida.</p>
       </div>
     )
   }
 
   return (
-    <div className="max-w-5xl mx-auto p-4">
+    <div className="max-w-5xl mx-auto p-4 space-y-6">
+      <div className="bg-white p-4 rounded-2xl shadow-soft">
+        <h3 className="text-lg font-semibold mb-3">Preferencias</h3>
+        <div className="grid md:grid-cols-2 gap-3 items-end">
+          <label className="flex items-center gap-3">
+            <input type="checkbox" checked={mask} onChange={e=>setMask(e.target.checked)} />
+            <span>Ocultar datos sensibles en Búsqueda (nombres, descripciones)</span>
+          </label>
+          <div className="flex items-end gap-2">
+            <div className="flex-1">
+              <label className="text-sm text-gray-700">Email para recordatorios</label>
+              <input value={email} onChange={e=>setEmail(e.target.value)} placeholder="tu@correo.com"
+                className="mt-1 w-full rounded-xl border px-3 py-2" />
+            </div>
+            <button onClick={savePrefs} className="px-4 py-2 rounded-2xl bg-blue-600 text-white">Guardar</button>
+          </div>
+          <p className="text-xs text-gray-500 col-span-full">Para enviar correos configura RESEND_API_KEY o SENDGRID_API_KEY y NOTIFY_FROM en Netlify.</p>
+        </div>
+      </div>
+
       <div className="bg-white p-4 rounded-2xl shadow-soft">
         <h3 className="text-lg font-semibold mb-2">Catálogos (listas desplegables)</h3>
         <div className="flex gap-3 mb-3">

@@ -8,7 +8,18 @@ const DEFAULT = {
   EstadoRequisición: ["Abierta","Screening","Entrevistas","Oferta","Contratada","Cancelada"],
   EstadoCandidato: ["Aplicó","Screening","Entrevista 1","Entrevista 2","Oferta","Rechazado","Contratado"],
   TiposContrato: ["Tiempo completo","Tiempo parcial","Temporal","Por horas","Por proyecto","Contrato fijo","Consultoría","Servicios profesionales","Outsourcing","Seasonal","Internado"],
-  FuentesCandidato: ["LinkedIn","Indeed","Glassdoor","Computrabajo","Facebook","Instagram","X/Twitter","Página corporativa","Referido interno","Agencia de empleo","Universidad","Feria de empleo","Gobierno PR - Empleos","Handshake","Monster","ZipRecruiter","Boletín interno"]
+  FuentesCandidato: ["LinkedIn","Indeed","Glassdoor","Computrabajo","Facebook","Instagram","X/Twitter","Página corporativa","Referido interno","Agencia de empleo","Universidad","Feria de empleo","Gobierno PR - Empleos","Handshake","Monster","ZipRecruiter","Boletín interno"],
+  "Subtipo/Detalle": [],
+  "ClienteInterno/Unidad": [],
+  "Responsable": [],
+  "Aprobador": [],
+  "Resultado/Acción": [],
+  "Puesto": [],
+  "Ubicación": [],
+  "Responsable (Requisiciones)": [],
+  "Aprobador (Requisiciones)": [],
+  "Próximo paso": ["Entrevista 1","Entrevista 2","Prueba técnica","Oferta","Onboarding","Seguimiento"],
+  "Clasificación": ["A","B","C"]
 }
 exports.handler = async (event) => {
   if (event.httpMethod !== 'GET') return { statusCode: 405, body: 'Method Not Allowed' }

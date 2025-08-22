@@ -1,5 +1,15 @@
 import { useEffect, useMemo, useState } from 'react'
 import { listRows } from '../lib/api'
+import { Prefs } from '../config'
+
+function mask(v: any) {
+  if (!Prefs.maskSensitive) return String(v||'')
+  if (!v) return ''
+  const s = String(v)
+  if (s.length <= 2) return '••'
+  if (s.includes(' ')) return s.split(' ').map(p => p ? p[0] + '•••' : '').join(' ')
+  return s[0] + '•••'
+}
 
 export default function SearchPage() {
   const [q, setQ] = useState('')
@@ -63,7 +73,7 @@ export default function SearchPage() {
                 return <tr key={i} className="border-t">
                   <td className="py-2 pr-6">Tareas</td>
                   <td className="py-2 pr-6">{r['Referencia/ID']||''}</td>
-                  <td className="py-2 pr-6">{r['Descripción']||''}</td>
+                  <td className="py-2 pr-6">{mask(r['Descripción'])}</td>
                   <td className="py-2 pr-6">{r['Estado']||''}</td>
                   <td className="py-2 pr-6">{r['Negocio']||''} · {r['Área']||''}</td>
                 </tr>
@@ -72,7 +82,7 @@ export default function SearchPage() {
                 return <tr key={i} className="border-t">
                   <td className="py-2 pr-6">Requisiciones</td>
                   <td className="py-2 pr-6">{r['RequisiciónID']||''}</td>
-                  <td className="py-2 pr-6">{r['Puesto']||''}</td>
+                  <td className="py-2 pr-6">{mask(r['Puesto']||r['Notas'])}</td>
                   <td className="py-2 pr-6">{r['EstadoRequisición']||''}</td>
                   <td className="py-2 pr-6">{r['Negocio']||''} · {r['Área']||''}</td>
                 </tr>
@@ -80,13 +90,14 @@ export default function SearchPage() {
               return <tr key={i} className="border-t">
                 <td className="py-2 pr-6">Candidatos</td>
                 <td className="py-2 pr-6">{r['CandidatoID']||''}</td>
-                <td className="py-2 pr-6">{r['Nombre']||''}</td>
+                <td className="py-2 pr-6">{mask(r['Nombre'])}</td>
                 <td className="py-2 pr-6">{r['EstadoCandidato']||''}</td>
                 <td className="py-2 pr-6">{r['RequisiciónID']||''} · {r['Fuente']||''}</td>
               </tr>
             })}
           </tbody>
         </table>
+        {Prefs.maskSensitive && <p className="text-xs text-gray-500 mt-2">* Datos sensibles ocultos. Puedes desactivar esta opción en Ajustes (protegido).</p>}
       </div>
     </div>
   )

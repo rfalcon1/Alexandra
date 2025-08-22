@@ -1,43 +1,44 @@
+// Zona PR (solo para legibilidad; los <input type="date"> usan ISO)
 const TZ = 'America/Puerto_Rico'
-const LOCALE = 'es-PR'
 
-export function todayISO() {
-  const now = new Date()
-  const y = now.getFullYear()
-  const m = String(now.getMonth()+1).padStart(2,'0')
-  const d = String(now.getDate()).padStart(2,'0')
-  return `${y}-${m}-${d}`
+export function todayISO(): string {
+  const d = new Date()
+  const y = d.getFullYear()
+  const m = String(d.getMonth()+1).padStart(2,'0')
+  const day = String(d.getDate()).padStart(2,'0')
+  return `${y}-${m}-${day}`
 }
 
-export function parse12h(str: string): number | null {
-  if (!str) return null
-  const m = str.trim().match(/^([0]?[1-9]|1[0-2]):([0-5][0-9])\s*([AaPp][Mm])$/)
-  if (!m) return null
-  let h = parseInt(m[1],10)
-  const min = parseInt(m[2],10)
-  const ampm = m[3].toUpperCase()
-  if (ampm === 'PM' && h !== 12) h += 12
-  if (ampm === 'AM' && h === 12) h = 0
+// "08:15 PM" -> minutos desde medianoche
+export function parse12h(s: string): number {
+  if (!s) return NaN
+  const m = s.match(/^\s*(\d{1,2}):(\d{2})\s*([AP]M)\s*$/i)
+  if (!m) return NaN
+  let h = parseInt(m[1],10); const min = parseInt(m[2],10)
+  const ap = m[3].toUpperCase()
+  if (ap === 'PM' && h !== 12) h += 12
+  if (ap === 'AM' && h === 12) h = 0
   return h*60 + min
 }
 
-export function diffDHMS(startMin: number | null, endMin: number | null): {min:number, text:string} {
-  if (startMin==null || endMin==null) return { min: 0, text: '' }
-  let diff = endMin - startMin
-  if (diff < 0) diff += 24*60
-  const days = Math.floor(diff / (24*60))
-  const hrs = Math.floor((diff % (24*60))/60)
-  const mins = diff % 60
+export function diffDHMS(startMin?: number, endMin?: number) {
+  const invalid = isNaN(startMin||NaN) || isNaN(endMin||NaN) || (endMin! < startMin!)
+  if (invalid) return { min: 0, text: '' }
+  let total = (endMin! - startMin!)
+  const days = Math.floor(total / (60*24))
+  total -= days*60*24
+  const hours = Math.floor(total / 60)
+  const minutes = total - hours*60
   const parts = []
   if (days) parts.push(`${days}d`)
-  if (hrs) parts.push(`${hrs}h`)
-  if (mins || parts.length===0) parts.push(`${mins}m`)
-  return { min: diff, text: parts.join(' ') }
+  if (hours) parts.push(`${hours}h`)
+  if (minutes || parts.length===0) parts.push(`${minutes}m`)
+  return { min: (endMin! - startMin!), text: parts.join(' ') }
 }
 
-export function fmtDatePR(dISO: string): string {
-  try {
-    const d = new Date(dISO + 'T00:00:00')
-    return new Intl.DateTimeFormat(LOCALE, { timeZone: TZ, year:'numeric', month:'2-digit', day:'2-digit' }).format(d)
-  } catch { return dISO }
+// "YYYY-MM-DD" -> "MM/DD/YYYY" (estándar PR/US)
+export function fmtDatePR(d: string): string {
+  const m = d?.match(/^(\d{4})-(\d{2})-(\d{2})$/)
+  if (!m) return d || ''
+  return `${m[2]}/${m[3]}/${m[1]}`
 }
